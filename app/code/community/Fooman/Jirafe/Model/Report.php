@@ -263,7 +263,8 @@ class Fooman_Jirafe_Model_Report extends Mage_Core_Model_Abstract
         $currencyLocale = Mage::getModel('directory/currency')->load($data['currency']);
 
         // Make formatted values for reports
-        $fdata['date_formatted'] = Mage::helper('core')->formatDate($data['date'], 'medium');
+        $zendDate = new Zend_Date(strtotime($data['date']), null, Mage::app()->getLocale()->getLocale());
+        $fdata['date_formatted'] = $zendDate->toString(Mage::app()->getLocale()->getDateFormat('medium'));
         $fdata['visitor_conversion_rate_formatted'] = sprintf("%01.2f", $data['visitor_conversion_rate'] * 100);
 
         $currencyFormatItems = array(
