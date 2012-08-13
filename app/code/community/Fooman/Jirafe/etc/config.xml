@@ -268,6 +268,15 @@
                     </foomanjirafe_salesQuoteRemoveItem>
                 </observers>
             </sales_quote_remove_item>
+            <sales_quote_collect_totals_before>
+                <observers>
+                    <foomanjirafe_salesQuoteCollectTotalsBefore>
+                        <type>singleton</type>
+                        <class>Fooman_Jirafe_Model_Observer</class>
+                        <method>salesQuoteCollectTotalsBefore</method>
+                    </foomanjirafe_salesQuoteCollectTotalsBefore>
+                </observers>
+            </sales_quote_collect_totals_before>
             <sales_quote_collect_totals_after>
                 <observers>
                     <foomanjirafe_salesQuoteCollectTotalsAfter>

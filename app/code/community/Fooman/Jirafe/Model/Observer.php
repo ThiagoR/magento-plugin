@@ -530,7 +530,13 @@ class Fooman_Jirafe_Model_Observer
             $piwikTracker->setCustomVariable(1, 'U', Fooman_Jirafe_Block_Js::VISITOR_READY2BUY);
 
             $this->_addEcommerceItems($piwikTracker, $quote);
-            if($quote->getCustomerEmail() && $quote->getCustomerFirstname()) {
+            $billingAddress = $quote->getBillingAddress();
+            $shippingAddress = $quote->getShippingAddress();
+            if($billingAddress && $billingAddress->getEmail() && $billingAddress->getFirstname()) {
+                $piwikTracker->doTrackEcommerceCartUpdate($quote->getBaseGrandTotal(), $billingAddress->getEmail(), $billingAddress->getFirstname());
+            } elseif($shippingAddress && $shippingAddress->getEmail() && $shippingAddress->getFirstname()) {
+                $piwikTracker->doTrackEcommerceCartUpdate($quote->getBaseGrandTotal(), $shippingAddress->getEmail(), $shippingAddress->getFirstname());
+            } elseif($quote->getCustomerEmail() && $quote->getCustomerFirstname()) {
                 $piwikTracker->doTrackEcommerceCartUpdate($quote->getBaseGrandTotal(), $quote->getCustomerEmail(), $quote->getCustomerFirstname());
             } else {
                 $piwikTracker->doTrackEcommerceCartUpdate($quote->getBaseGrandTotal());
@@ -538,7 +544,7 @@ class Fooman_Jirafe_Model_Observer
             $quote->setJirafeVisitorId($piwikTracker->getVisitorId());
         }
     }
-    
+
     /**
      * event observer when a product has been added to the cart
      * triggers ecommerceCartUpdate via salesQuoteCollectTotalsAfter
@@ -591,18 +597,52 @@ class Fooman_Jirafe_Model_Observer
             Mage::register('foomanjirafe_update_ecommerce', true);
         }        
     }
-    
     /**
      * trigger ecommerceCartUpdate when any changes to the shopping basket
      * need to be send
-     * 
-     * @param $observer 
-     */    
+     *
+     * @param $observer
+     */
+    public function salesQuoteCollectTotalsBefore ($observer)
+    {
+        $quote = $observer->getEvent()->getQuote();
+        if(!Mage::registry('foomanjirafe_update_ecommerce') && $this->abandonedCartInfoNowAvailable($quote)) {
+            Mage::register('foomanjirafe_update_ecommerce', true);
+        }
+    }
+
+    /**
+     * trigger ecommerceCartUpdate when any changes to the shopping basket
+     * need to be send
+     *
+     * @param $observer
+     */
     public function salesQuoteCollectTotalsAfter ($observer)
     {
         if(Mage::registry('foomanjirafe_update_ecommerce')) {
             $this->ecommerceCartUpdate($observer->getEvent()->getQuote());
             Mage::unregister('foomanjirafe_update_ecommerce');
-        }        
+        }
+    }
+
+    protected function abandonedCartInfoNowAvailable($quote)
+    {
+        $billingAddress = $quote->getBillingAddress();
+        $shippingAddress = $quote->getShippingAddress();
+
+        if($quote->dataHasChangedFor('customer_email') || $quote->dataHasChangedFor('customer_firstname')) {
+            return true;
+        }
+        if ($billingAddress) {
+            if( $billingAddress->dataHasChangedFor('email') ||  $billingAddress->dataHasChangedFor('fistname')) {
+                return true;
+            }
+        }
+        if ($shippingAddress) {
+            if( $shippingAddress->dataHasChangedFor('email') ||  $shippingAddress->dataHasChangedFor('fistname')) {
+                return true;
+            }
+        }
+        return false;
     }
 }
