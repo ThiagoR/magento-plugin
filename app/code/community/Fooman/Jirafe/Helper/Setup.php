@@ -22,6 +22,18 @@ class Fooman_Jirafe_Helper_Setup extends Mage_Core_Helper_Abstract
         $currentConfigVersion = (string) Mage::getConfig()->getModuleConfig('Fooman_Jirafe')->version;
         switch ($version) {
             case $currentConfigVersion:
+            case '1.1.0':
+                $instructions = array_merge(
+                    $instructions,
+                    array(
+                        array("type" =>"sql-column", "table" =>"sales_flat_quote", "name" =>"jirafe_visitor_id","params" =>"varchar(255) DEFAULT NULL"),
+                        array("type" =>"sql-column", "table" =>"sales_flat_quote", "name" =>"jirafe_orig_visitor_id","params" =>"varchar(255) DEFAULT NULL")
+                    )
+                );
+                if(!$returnComplete) {
+                    break;
+                }
+                //nobreak intentionally;
             case '1.0.0':
             case '0.6.1':
             case '0.6.0':

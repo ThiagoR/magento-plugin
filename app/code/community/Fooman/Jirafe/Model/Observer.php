@@ -530,7 +530,12 @@ class Fooman_Jirafe_Model_Observer
             $piwikTracker->setCustomVariable(1, 'U', Fooman_Jirafe_Block_Js::VISITOR_READY2BUY);
 
             $this->_addEcommerceItems($piwikTracker, $quote);
-            $piwikTracker->doTrackEcommerceCartUpdate($quote->getBaseGrandTotal());
+            if($quote->getCustomerEmail() && $quote->getCustomerFirstname()) {
+                $piwikTracker->doTrackEcommerceCartUpdate($quote->getBaseGrandTotal(), $quote->getCustomerEmail(), $quote->getCustomerFirstname());
+            } else {
+                $piwikTracker->doTrackEcommerceCartUpdate($quote->getBaseGrandTotal());
+            }
+            $quote->setJirafeVisitorId($piwikTracker->getVisitorId());
         }
     }
     

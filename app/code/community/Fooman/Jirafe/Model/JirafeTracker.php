@@ -89,6 +89,39 @@ class Fooman_Jirafe_Model_JirafeTracker extends Piwik_PiwikTracker
         }
         
         parent::addEcommerceItem($sku, $name, $category, $price, $quantity);
-    }     
-       
+    }
+
+    protected function getUrlTrackEcommerce(
+        $grandTotal,
+        $subTotal = false,
+        $tax = false,
+        $shipping = false,
+        $discount = false,
+        $visitorEmail = false,
+        $visitorName = false
+    )
+    {
+        $url = parent::getUrlTrackEcommerce(
+            $grandTotal, $subTotal = false, $tax = false, $shipping = false, $discount = false
+        );
+        if ($visitorEmail) {
+            $url .= '&visitor_email=' . $visitorEmail;
+        }
+        if ($visitorName) {
+            $url .= '&visitor_name=' . $visitorName;
+        }
+        return $url;
+    }
+
+    public function doTrackEcommerceCartUpdate($grandTotal, $visitorEmail = false, $visitorName = false)
+    {
+        $url = $this->getUrlTrackEcommerceCartUpdate($grandTotal, $visitorEmail, $visitorName);
+        return $this->sendRequest($url);
+    }
+
+    public function getUrlTrackEcommerceCartUpdate($grandTotal, $visitorEmail = false, $visitorName = false)
+    {
+        $url = $this->getUrlTrackEcommerce($grandTotal, false, false, false, false, $visitorEmail, $visitorName);
+        return $url;
+    }
 }
