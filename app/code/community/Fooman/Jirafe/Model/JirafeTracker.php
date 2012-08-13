@@ -124,4 +124,17 @@ class Fooman_Jirafe_Model_JirafeTracker extends Piwik_PiwikTracker
         $url = $this->getUrlTrackEcommerce($grandTotal, false, false, false, false, $visitorEmail, $visitorName);
         return $url;
     }
+
+    public function getUrlRecoveryEmailUpdate($visitorId, $status)
+    {
+        $url = $this->getRequest($this->idSite);
+        $url .= "&vid={$visitorId}&mail_status={$status}";
+        return $url;
+    }
+
+    public function doRecoveryEmailUpdate($visitorId, $status)
+    {
+        $url = $this->getUrlRecoveryEmailUpdate($visitorId, $status);
+        return $this->sendRequest($url);
+    }
 }

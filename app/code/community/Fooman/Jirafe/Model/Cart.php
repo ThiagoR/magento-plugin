@@ -22,6 +22,11 @@ class Fooman_Jirafe_Model_Cart extends Mage_Core_Model_Abstract
             Mage::getSingleton('checkout/session')->setQuoteId($oldQuote->getId());
             $quote = Mage::getSingleton('checkout/session')->getQuote();
             $quote->setJirafeOrigVisitorId($visitorId)->save();
+            $siteId = Mage::helper('foomanjirafe')->getStoreConfig('site_id', $quote->getStoreId());
+
+            $jirafePiwikUrl = 'http://' . Mage::getModel('foomanjirafe/jirafe')->getPiwikBaseUrl();
+            $piwikTracker = new Fooman_Jirafe_Model_JirafeTracker($siteId, $jirafePiwikUrl);
+            $piwikTracker->doRecoveryEmailUpdate($visitorId, 3);
         }
     }
 }
