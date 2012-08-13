@@ -25,7 +25,6 @@ class Fooman_Jirafe_Model_Observer
      */
     protected function _initPiwikTracker ($storeId)
     {
-        $siteId = Mage::helper('foomanjirafe')->getStoreConfig('site_id', $storeId);
         $appToken = Mage::helper('foomanjirafe')->getStoreConfig('app_token');
         $siteId = Mage::helper('foomanjirafe')->getStoreConfig('site_id', $storeId);
 
