@@ -18,7 +18,7 @@
 <config>
     <modules>
         <Fooman_Jirafe>
-            <version>0.5.3</version>
+            <version>1.0.0</version>
         </Fooman_Jirafe>
     </modules>
 
@@ -140,7 +140,7 @@
         <template>
             <email>
                <foomanjirafe_report_template translate="label" module="foomanjirafe">
-                   <label>New Report</label>
+                   <label>New Jirafe Report</label>
                    <file>jirafe/report.html</file>
                    <type>html</type>
                </foomanjirafe_report_template>

@@ -163,9 +163,13 @@ class Fooman_Jirafe_Model_Jirafe
         }
     }
 
-    public function checkEventsToken ($token, $hash)
+    public function checkEventsToken($token, $hash)
     {
-        return $hash == sha1($token.Mage::helper('foomanjirafe')->getStoreConfig('app_token'));
+        if ($hash == sha1($token . Mage::helper('foomanjirafe')->getStoreConfig('app_token'))) {
+            return true;
+        }
+        Mage::helper('foomanjirafe')->debug('Could not verify event token and hash ' . $hash . ' vs ' . sha1($token . Mage::helper('foomanjirafe')->getStoreConfig('app_token')));
+        return false;
     }
 
     /**
@@ -543,6 +547,7 @@ class Fooman_Jirafe_Model_Jirafe
         $client->setParameterPost('siteId', $siteId);
         $client->setParameterPost('events', json_encode($events));
         $client->setParameterPost('timestamp', Mage::getSingleton('core/date')->gmtTimestamp());
+        Mage::helper('foomanjirafe')->debugEvent(json_encode($events));
         try {
             $response = $client->request('POST');
         } catch (Exception $e) {
@@ -593,4 +598,24 @@ class Fooman_Jirafe_Model_Jirafe
         }
     }
 
+    public function getOrderSyncStatus()
+    {
+        $appId = Mage::helper('foomanjirafe')->getStoreConfig('app_id');
+        if ($appId) {
+            $stores = Mage::helper('foomanjirafe')->getStores();
+            $sitesSyncStatus = array();
+            foreach ($stores as $storeId => $store) {
+                $siteId = Mage::helper('foomanjirafe')->getStoreConfig('site_id', $storeId);
+                if ($siteId) {
+                    try {
+                        $sitesSyncStatus[$siteId] = $this->getJirafeApi()->applications($appId)->sites($siteId)->orders()->status()->fetch();
+                    } catch (Exception $e) {
+                        $sitesSyncStatus[$siteId] = array('ok' => 0, 'errors' => $e->getMessage(), 'version' => 'N/A');
+                    }
+                }
+            }
+            return $sitesSyncStatus;
+        }
+
+    }
 }
