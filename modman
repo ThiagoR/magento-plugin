@@ -1,0 +1,15 @@
+app/code/community/Fooman/Jirafe				app/code/community/Fooman/Jirafe
+app/design/adminhtml/default/default/layout/foomanjirafe.xml	app/design/adminhtml/default/default/layout/foomanjirafe.xml
+app/design/adminhtml/default/default/template/fooman/jirafe	app/design/adminhtml/default/default/template/fooman/jirafe
+app/design/frontend/base/default/layout/foomanjirafe.xml	app/design/frontend/base/default/layout/foomanjirafe.xml
+app/design/frontend/base/default/template/fooman/jirafe		app/design/frontend/base/default/template/fooman/jirafe
+app/etc/modules/Fooman_Jirafe.xml				app/etc/modules/Fooman_Jirafe.xml
+app/locale/en_US/template/email/jirafe				app/locale/en_US/template/email/jirafe
+js/fooman/jirafe						js/fooman/jirafe
+lib/Piwik							lib/Piwik
+lib/Jirafe							lib/Jirafe
+
+@shell pushd $MODULE; \
+    git submodule init; \
+    git submodule update; \
+    popd
