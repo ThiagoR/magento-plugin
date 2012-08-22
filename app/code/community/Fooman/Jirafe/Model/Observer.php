@@ -638,12 +638,12 @@ class Fooman_Jirafe_Model_Observer
             return true;
         }
         if ($billingAddress) {
-            if( $billingAddress->dataHasChangedFor('email') ||  $billingAddress->dataHasChangedFor('fistname')) {
+            if( $billingAddress->dataHasChangedFor('email') ||  $billingAddress->dataHasChangedFor('firstname')) {
                 return true;
             }
         }
         if ($shippingAddress) {
-            if( $shippingAddress->dataHasChangedFor('email') ||  $shippingAddress->dataHasChangedFor('fistname')) {
+            if( $shippingAddress->dataHasChangedFor('email') ||  $shippingAddress->dataHasChangedFor('firstname')) {
                 return true;
             }
         }
