@@ -23,6 +23,23 @@ class Fooman_Jirafe_Helper_Setup extends Mage_Core_Helper_Abstract
         switch ($version) {
             case $currentConfigVersion:
             case '1.1.0':
+
+                if(version_compare(Mage::getVersion(),'1.4.1.0') >= 0){
+                    $instructions = array_merge(
+                        $instructions,
+                        array(
+                            array("type" =>"sql-column", "table" =>"sales/order", "name" =>"jirafe_orig_visitor_id","params" =>"varchar(255) DEFAULT NULL")
+                        )
+                    );
+                } else {
+                    $instructions = array_merge(
+                        $instructions,
+                        array(
+                            array("type" =>"eav-attribute", "entity" =>"order", "name" =>"jirafe_orig_visitor_id","params" =>array('type' => 'varchar','label' => 'Jirafe Original Visitor Id','required'=>0,'global'=>1,'visible'=>0))
+                        )
+                    );
+                }
+
                 $instructions = array_merge(
                     $instructions,
                     array(

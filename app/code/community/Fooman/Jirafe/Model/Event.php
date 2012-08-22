@@ -82,6 +82,7 @@ class Fooman_Jirafe_Model_Event extends Mage_Core_Model_Abstract
             'status'            => $this->_getOrderStatus($order),
             'customerHash'      => Mage::helper('foomanjirafe')->getCustomerHash($order->getCustomerEmail()),
             'visitorId'         => $this->_getJirafeVisitorId($order),
+            'recovery_visit_id' => $order->getJirafeOrigVisitorId(),
             'time'              => strtotime($order->getCreatedAt()),
             'grandTotal'        => Mage::helper('foomanjirafe')->formatAmount($order->getBaseGrandTotal()),
             'subTotal'          => Mage::helper('foomanjirafe')->formatAmount($order->getBaseSubtotal()),

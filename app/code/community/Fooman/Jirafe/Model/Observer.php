@@ -61,14 +61,18 @@ class Fooman_Jirafe_Model_Observer
     public function salesConvertQuoteToOrder ($observer)
     {
         Mage::helper('foomanjirafe')->debug('salesConvertQuoteToOrder');
-        $order = $observer->getOrder();
         /* @var $order Mage_Sales_Model_Order */
+        $order = $observer->getEvent()->getOrder();
+        /* @var $order Mage_Sales_Model_Quote */
+        $quote = $observer->getEvent()->getQuote();
+
         $piwikTracker = $this->_initPiwikTracker($order->getStoreId());
         if (Mage::getDesign()->getArea() == 'frontend') {
             Mage::helper('foomanjirafe')->debug('salesConvertQuoteToOrder Frontend');
             $order->setJirafePlacedFromFrontend(true);
         }
         $order->setJirafeVisitorId($piwikTracker->getVisitorId());
+        $order->setJirafeOrigVisitorId($quote->getJirafeOrigVisitorId());
         $order->setJirafeAttributionData($piwikTracker->getAttributionInfo());
         $order->setJirafeIsNew(1);
     }
