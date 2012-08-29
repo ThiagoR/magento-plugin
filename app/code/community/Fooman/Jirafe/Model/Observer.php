@@ -536,15 +536,17 @@ class Fooman_Jirafe_Model_Observer
             $this->_addEcommerceItems($piwikTracker, $quote);
             $billingAddress = $quote->getBillingAddress();
             $shippingAddress = $quote->getShippingAddress();
-            if($billingAddress && $billingAddress->getEmail() && $billingAddress->getFirstname()) {
-                $piwikTracker->doTrackEcommerceCartUpdate($quote->getBaseGrandTotal(), $billingAddress->getEmail(), $billingAddress->getFirstname());
-            } elseif($shippingAddress && $shippingAddress->getEmail() && $shippingAddress->getFirstname()) {
-                $piwikTracker->doTrackEcommerceCartUpdate($quote->getBaseGrandTotal(), $shippingAddress->getEmail(), $shippingAddress->getFirstname());
-            } elseif($quote->getCustomerEmail() && $quote->getCustomerFirstname()) {
-                $piwikTracker->doTrackEcommerceCartUpdate($quote->getBaseGrandTotal(), $quote->getCustomerEmail(), $quote->getCustomerFirstname());
-            } else {
-                $piwikTracker->doTrackEcommerceCartUpdate($quote->getBaseGrandTotal());
+            if ($billingAddress && $billingAddress->getEmail() && $billingAddress->getFirstname()) {
+                $piwikTracker->setCustomVariable(3, 'email', $billingAddress->getEmail());
+                $piwikTracker->setCustomVariable(4, 'firstName', $billingAddress->getFirstname());
+            } elseif ($shippingAddress && $shippingAddress->getEmail() && $shippingAddress->getFirstname()) {
+                $piwikTracker->setCustomVariable(3, 'email', $shippingAddress->getEmail());
+                $piwikTracker->setCustomVariable(4, 'firstName', $shippingAddress->getFirstname());
+            } elseif ($quote->getCustomerEmail() && $quote->getCustomerFirstname()) {
+                $piwikTracker->setCustomVariable(3, 'email', $quote->getCustomerEmail());
+                $piwikTracker->setCustomVariable(4, 'firstName', $quote->getCustomerFirstname());
             }
+            $piwikTracker->doTrackEcommerceCartUpdate($quote->getBaseGrandTotal());
             $quote->setJirafeVisitorId($piwikTracker->getVisitorId());
         }
     }
