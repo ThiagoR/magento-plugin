@@ -403,8 +403,21 @@ class Fooman_Jirafe_Model_Jirafe
                     //in some cases we produce a doubled up base url, try this method instead - https://example.com/https://example.com/foomanjirafe/events
                     $storeJirafeApiUrl = rtrim(Mage::helper('foomanjirafe')->getStoreConfigDirect('web/secure/base_url', $store->getId(),false), '/').'/index.php/foomanjirafe/events';
                 }
+
+                // Send store Cart URL
+                $storeCartUrl = trim((string)$store->getUrl('checkout/cart', array('_secure'=>true, '_nosid'=>true)));
+                if (stripos($storeCartUrl, 'http') !== 0){
+                    //Magento can in some versions return an empty base url during the installation routine
+                    $storeCartUrl = Mage::helper('foomanjirafe')->getStoreConfigDirect('web/secure/base_url', $store->getId(),false).$storeCartUrl;
+                }
+                if(substr_count($storeJirafeApiUrl, '://') != 1){
+                    //in some cases we produce a doubled up base url, https://example.com/https://example.com/checkout/cart
+                    //try this method instead
+                    $storeCartUrl = rtrim(Mage::helper('foomanjirafe')->getStoreConfigDirect('web/secure/base_url', $store->getId(),false), '/').'/index.php/checkout/cart';
+                }
                 Mage::helper('foomanjirafe')->debug('Store API URL ' . $storeJirafeApiUrl);
-                $this->getJirafeApi()->applications($appId)->sites()->get($jirafeSite['site_id'])->update(array('store_api_url'=>$storeJirafeApiUrl));
+                Mage::helper('foomanjirafe')->debug('Store Cart URL ' . $storeCartUrl);
+                $this->getJirafeApi()->applications($appId)->sites()->get($jirafeSite['site_id'])->update(array('store_api_url'=>$storeJirafeApiUrl, 'store_cart_url'=>$storeCartUrl));
 
                 // Call CMB for the store
                 $this->sendCMB($siteId);
