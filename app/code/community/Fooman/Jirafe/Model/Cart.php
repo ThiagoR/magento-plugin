@@ -19,10 +19,17 @@ class Fooman_Jirafe_Model_Cart extends Mage_Core_Model_Abstract
     {
         $oldQuote = Mage::getModel('sales/quote')->load($visitorId, 'jirafe_visitor_id');
         if ($oldQuote->getId()) {
-            Mage::getSingleton('checkout/session')->setQuoteId($oldQuote->getId());
-            $quote = Mage::getSingleton('checkout/session')->getQuote();
-            $quote->setJirafeOrigVisitorId($visitorId)->save();
-            $siteId = Mage::helper('foomanjirafe')->getStoreConfig('site_id', $quote->getStoreId());
+            if ($oldQuote->getCustomerId()) {
+                $customer = Mage::getModel('customer/customer')->load($oldQuote->getCustomerId());
+                $customerSession = Mage::getSingleton('customer/session');
+                if ($customerSession->isLoggedIn()) {
+                    $customerSession->logout();
+                }
+                $customerSession->setCustomerAsLoggedIn($customer);
+            }
+            Mage::getSingleton('checkout/session')->replaceQuote($oldQuote);
+            $oldQuote->setJirafeOrigVisitorId($visitorId)->save();
+            $siteId = Mage::helper('foomanjirafe')->getStoreConfig('site_id', $oldQuote->getStoreId());
 
             $jirafePiwikUrl = 'http://' . Mage::getModel('foomanjirafe/jirafe')->getPiwikBaseUrl();
             $piwikTracker = new Fooman_Jirafe_Model_JirafeTracker($siteId, $jirafePiwikUrl);

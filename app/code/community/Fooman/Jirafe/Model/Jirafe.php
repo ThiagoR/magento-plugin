@@ -405,7 +405,7 @@ class Fooman_Jirafe_Model_Jirafe
                 }
 
                 // Send store Cart URL
-                $storeCartUrl = trim((string)$store->getUrl('checkout/cart', array('_secure'=>true, '_nosid'=>true)));
+                $storeCartUrl = trim((string)$store->getUrl('foomanjirafe/cart', array('_secure'=>true, '_nosid'=>true)));
                 if (stripos($storeCartUrl, 'http') !== 0){
                     //Magento can in some versions return an empty base url during the installation routine
                     $storeCartUrl = Mage::helper('foomanjirafe')->getStoreConfigDirect('web/secure/base_url', $store->getId(),false).$storeCartUrl;
