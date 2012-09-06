@@ -19,9 +19,13 @@ class Fooman_Jirafe_Model_Cart extends Mage_Core_Model_Abstract
     {
         $oldQuote = Mage::getModel('sales/quote')->load($visitorId, 'jirafe_visitor_id');
         if ($oldQuote->getId()) {
+            $customerSession = Mage::getSingleton('customer/session');
+            if($oldQuote->getConvertedAt()) {
+                $customerSession->addNotice(Mage::helper('foomanjirafe')->__('This basket has been ordered already.'));
+                return false;
+            }
             if ($oldQuote->getCustomerId()) {
                 $customer = Mage::getModel('customer/customer')->load($oldQuote->getCustomerId());
-                $customerSession = Mage::getSingleton('customer/session');
                 if ($customerSession->isLoggedIn()) {
                     $customerSession->logout();
                 }
@@ -34,6 +38,8 @@ class Fooman_Jirafe_Model_Cart extends Mage_Core_Model_Abstract
             $jirafePiwikUrl = 'http://' . Mage::getModel('foomanjirafe/jirafe')->getPiwikBaseUrl();
             $piwikTracker = new Fooman_Jirafe_Model_JirafeTracker($siteId, $jirafePiwikUrl);
             $piwikTracker->doRecoveryEmailUpdate($visitorId, 3);
+            return true;
         }
+        return false;
     }
 }

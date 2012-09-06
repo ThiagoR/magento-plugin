@@ -18,13 +18,18 @@ class Fooman_Jirafe_CartController extends Mage_Core_Controller_Front_Action
 
     public function indexAction()
     {
+        $recovered = false;
         $visitorId = $this->getRequest()->getParam('visitor_id');
-        if($visitorId) {
-            Mage::getModel('foomanjirafe/cart')->recover($visitorId);
-            $this->_redirect('checkout/cart/*');
+        if ($visitorId) {
+            $recovered = Mage::getModel('foomanjirafe/cart')->recover($visitorId);
         }
-        //could not recover - redirect to homepage
-        $this->_redirect('/');
+
+        if ($recovered) {
+            $this->_redirect('checkout/cart/*');
+        } else {
+            //could not recover - redirect to homepage
+            $this->_redirect('/');
+        }
     }
 
 }
