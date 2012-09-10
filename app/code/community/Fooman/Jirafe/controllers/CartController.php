@@ -18,23 +18,13 @@ class Fooman_Jirafe_CartController extends Mage_Core_Controller_Front_Action
 
     public function indexAction()
     {
-        $utm = array();
-        foreach (array('utm_source', 'utm_medium', 'utm_term', 'utm_content', 'utm_campaign') as $k) {
-            if (!empty($_GET[$k])) {
-                $utm = $k.'='.urlencode($_GET[$k]);
-            }
-        }
-        $utm = join('&', $utm);
-            
         $customerSession = Mage::getSingleton('customer/session');
         if (!$customerSession->isLoggedIn()) {
             $customerSession->setBeforeAuthUrl(Mage::getUrl('checkout/cart'));
             $customerSession->addNotice(Mage::helper('foomanjirafe')->__('Please login to continue shopping.'));
-            $url = 'customer/account/login';
+            $this->_redirect('customer/account/login');
         } else {
-            $url = 'checkout/cart';
+            $this->_redirect('checkout/cart');
         }
-        
-        $this->_redirect($url.($utm ? '?'.$utm : ''));
     }
 }
