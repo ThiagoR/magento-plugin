@@ -20,7 +20,7 @@ class Fooman_Jirafe_CartController extends Mage_Core_Controller_Front_Action
     {
         $customerSession = Mage::getSingleton('customer/session');
         if (!$customerSession->isLoggedIn()) {
-            $customerSession->setBeforeAuthUrl(Mage::getUrl('checkout/cart', array('_current'=>true)));
+            $customerSession->setBeforeAuthUrl(Mage::getUrl('foomanjirafe/cart', array('_current'=>true)));
             $customerSession->addNotice(Mage::helper('foomanjirafe')->__('Please login to continue shopping.'));
             $this->_redirect('customer/account/login', array('_current'=>true));
         } else {
