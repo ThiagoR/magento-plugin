@@ -156,7 +156,7 @@ class Fooman_Jirafe_Helper_Data extends Mage_Core_Helper_Abstract
         return array(
             'platform_type'    => 'magento',
             'platform_version' => Mage::getVersion(),
-            'plugin_version'   => Mage::getResourceModel('core/resource')->getDbVersion('foomanjirafe_setup'),
+            'plugin_version'   => (string)Mage::getConfig()->getModuleConfig('Fooman_Jirafe')->version,
         );
     }
 
