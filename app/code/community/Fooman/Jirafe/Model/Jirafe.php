@@ -394,14 +394,14 @@ class Fooman_Jirafe_Model_Jirafe
                 }
                 
                 // Send store API URL
-                $storeJirafeApiUrl = trim((string)$store->getUrl('foomanjirafe/events', array('_secure'=>true, '_nosid'=>true)));
+                $storeJirafeApiUrl = trim((string)$store->getUrl('foomanjirafe/events', array('_secure'=>false, '_nosid'=>true)));
                 if (strpos($storeJirafeApiUrl, 'http') !== 0){
                     //Magento can in some versions return an empty base url during the installation routine - /foomanjirafe/events
-                    $storeJirafeApiUrl = Mage::helper('foomanjirafe')->getStoreConfigDirect('web/secure/base_url', $store->getId(),false).$storeJirafeApiUrl;
+                    $storeJirafeApiUrl = Mage::helper('foomanjirafe')->getStoreConfigDirect('web/unsecure/base_url', $store->getId(),false).$storeJirafeApiUrl;
                 }
                 if(substr_count($storeJirafeApiUrl, '://') != 1){
                     //in some cases we produce a doubled up base url, try this method instead - https://example.com/https://example.com/foomanjirafe/events
-                    $storeJirafeApiUrl = rtrim(Mage::helper('foomanjirafe')->getStoreConfigDirect('web/secure/base_url', $store->getId(),false), '/').'/index.php/foomanjirafe/events';
+                    $storeJirafeApiUrl = rtrim(Mage::helper('foomanjirafe')->getStoreConfigDirect('web/unsecure/base_url', $store->getId(),false), '/').'/index.php/foomanjirafe/events';
                 }
 
                 // Send store Cart URL
