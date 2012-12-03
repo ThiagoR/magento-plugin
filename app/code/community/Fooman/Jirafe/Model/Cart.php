@@ -15,31 +15,81 @@
 
 class Fooman_Jirafe_Model_Cart extends Mage_Core_Model_Abstract
 {
-    public function recover($visitorId)
-    {
-        $oldQuote = Mage::getModel('sales/quote')->load($visitorId, 'jirafe_visitor_id');
-        if ($oldQuote->getId()) {
-            $customerSession = Mage::getSingleton('customer/session');
-            if($oldQuote->getConvertedAt()) {
-                $customerSession->addNotice(Mage::helper('foomanjirafe')->__('This basket has been ordered already.'));
-                return false;
-            }
-            if ($oldQuote->getCustomerId()) {
-                $customer = Mage::getModel('customer/customer')->load($oldQuote->getCustomerId());
-                if ($customerSession->isLoggedIn()) {
-                    $customerSession->logout();
-                }
-                $customerSession->setCustomerAsLoggedIn($customer);
-            }
-            Mage::getSingleton('checkout/session')->replaceQuote($oldQuote);
-            $oldQuote->setJirafeOrigVisitorId($visitorId)->save();
-            $siteId = Mage::helper('foomanjirafe')->getStoreConfig('site_id', $oldQuote->getStoreId());
+    protected $_eventPrefix = 'foomanjirafe_cart';
+    protected $_eventObject = 'jirafecart';
 
-            $jirafePiwikUrl = 'http://' . Mage::getModel('foomanjirafe/jirafe')->getPiwikBaseUrl();
-            $piwikTracker = new Fooman_Jirafe_Model_JirafeTracker($siteId, $jirafePiwikUrl);
-            $piwikTracker->doRecoveryEmailUpdate($visitorId, 3);
-            return true;
+    protected function _construct ()
+    {
+        $this->_init('foomanjirafe/cart');
+    }
+
+    public function recover($visitorIdMd5)
+    {
+        $recoverInfo = $this->loadByVisitorMd5($visitorIdMd5);
+        if($recoverInfo->getId()){
+            $oldQuote = Mage::getModel('sales/quote')->load($recoverInfo->getQuoteId());
+            if ($oldQuote->getId()) {
+
+                if($this->hasCartBeenPurchased($oldQuote)) {
+                    Mage::throwException((Mage::helper('foomanjirafe')->__('This cart has already been ordered.')));
+                }
+                if ($oldQuote->getCustomerId()) {
+                    //don't auto login cart that belongs to a user
+                    return false;
+                    /*
+                    $customer = Mage::getModel('customer/customer')->load($oldQuote->getCustomerId());
+                    if ($customerSession->isLoggedIn()) {
+                        $customerSession->logout();
+                    }
+                    $customerSession->setCustomerAsLoggedIn($customer);
+                    */
+                }
+                Mage::getSingleton('checkout/session')->replaceQuote($oldQuote);
+                return true;
+            }
         }
         return false;
     }
+
+    public function saveRecoveryInformation($email, $visitorId, $quoteId)
+    {
+        $cart = $this->loadByVisitorMd5(md5($visitorId));
+        $cart->setEmailAddress($email)
+            ->setJirafeVisitorId($visitorId)
+            ->setJirafeVisitorIdMd5(md5($visitorId))
+            ->setQuoteId($quoteId)
+            ->save();
+    }
+
+    public function periodicClean()
+    {
+        //delete after 90 days
+        $deleteAfter = 60*60*24*90;
+        $collection = $this->getCollection()->addFieldToFiler();
+        $collection->addFieldToFilter('updated_at', array('to'=>date("Y-m-d", time()-$deleteAfter)));
+        $collection->walk('delete');
+    }
+
+    public function loadByVisitorMd5($visitorIdMd5)
+    {
+        $collection = $this->getCollection();
+        $collection
+            ->addFieldToFilter('jirafe_visitor_id_md5', $visitorIdMd5)
+            ->setOrder('created_at ', 'desc')
+            ->load();
+        if (count($collection)) {
+            return $collection->getFirstItem();
+        } else {
+            //no cart recovery info saved yet - create a new one
+            return Mage::getModel('foomanjirafe/cart');
+        }
+    }
+
+    public function hasCartBeenPurchased($quote)
+    {
+        $orderCollection = Mage::getModel('sales/order')->getCollection();
+        $orderCollection->addAttributeToFilter('quote_id', $quote->getId())->load();
+        return count($orderCollection) > 0;
+    }
+
 }

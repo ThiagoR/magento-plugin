@@ -18,13 +18,29 @@ class Fooman_Jirafe_CartController extends Mage_Core_Controller_Front_Action
 
     public function indexAction()
     {
+        $visitorIdMd5 = $this->getRequest()->getParam('visitor_id');
         $customerSession = Mage::getSingleton('customer/session');
         if (!$customerSession->isLoggedIn()) {
-            $customerSession->setBeforeAuthUrl(Mage::getUrl('foomanjirafe/cart', array('_current'=>true)));
-            $customerSession->addNotice(Mage::helper('foomanjirafe')->__('Please login to continue shopping.'));
-            $this->_redirect('customer/account/login', array('_current'=>true));
+            try{
+                //recover the cart for not logged in cart
+                $result = Mage::getModel('foomanjirafe/cart')->recover($visitorIdMd5);
+                if ($result) {
+                    //cart was recovered successfully
+                    $this->_redirect('checkout/cart', array('_current' => true));
+                } else {
+                    //redirect to login
+                    $customerSession->setBeforeAuthUrl(Mage::getUrl('foomanjirafe/cart', array('_current' => true)));
+                    $customerSession->addNotice(Mage::helper('foomanjirafe')->__('Please login to continue shopping.'));
+                    $this->_redirect('customer/account/login', array('_current' => true));
+                }
+            } catch (Mage_Core_Exception $e) {
+                $coreSession = Mage::getSingleton('core/session');
+                $coreSession->addNotice($e->getMessage());
+                $this->_redirect('/', array('_current' => true));
+            }
         } else {
-            $this->_redirect('checkout/cart', array('_current'=>true));
+            //user is already logged in - cart is current
+            $this->_redirect('checkout/cart', array('_current' => true));
         }
     }
 }

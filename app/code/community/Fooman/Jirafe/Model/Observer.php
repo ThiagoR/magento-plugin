@@ -523,6 +523,7 @@ class Fooman_Jirafe_Model_Observer
 
     /**
      * send tracking information for a shopping basket
+     * save reference information locally so that we can recover the cart
      * 
      * @param Mage_Sales_Model_Quote $quote 
      */
@@ -534,21 +535,40 @@ class Fooman_Jirafe_Model_Observer
             $piwikTracker->setCustomVariable(1, 'U', Fooman_Jirafe_Block_Js::VISITOR_READY2BUY);
 
             $this->_addEcommerceItems($piwikTracker, $quote);
-            $customerSession = Mage::getSingleton('customer/session');
-            if ($customerSession->isLoggedIn()) {
-                $billingAddress = $quote->getBillingAddress();
-                $shippingAddress = $quote->getShippingAddress();
-                if ($billingAddress && $billingAddress->getEmail() && $billingAddress->getFirstname()) {
-                    $piwikTracker->setCustomVariable(3, 'email', $billingAddress->getEmail());
-                    $piwikTracker->setCustomVariable(4, 'firstName', $billingAddress->getFirstname());
-                } elseif ($shippingAddress && $shippingAddress->getEmail() && $shippingAddress->getFirstname()) {
-                    $piwikTracker->setCustomVariable(3, 'email', $shippingAddress->getEmail());
-                    $piwikTracker->setCustomVariable(4, 'firstName', $shippingAddress->getFirstname());
-                } elseif ($quote->getCustomerEmail() && $quote->getCustomerFirstname()) {
-                    $piwikTracker->setCustomVariable(3, 'email', $quote->getCustomerEmail());
-                    $piwikTracker->setCustomVariable(4, 'firstName', $quote->getCustomerFirstname());
-                }
+
+            $billingAddress = $quote->getBillingAddress();
+            $shippingAddress = $quote->getShippingAddress();
+            $session = Mage::getSingleton('core/session');
+
+            //try to find an email address and first name BILLLING > QUOTE > SHIPPING > SESSION
+            $email = $billingAddress->getEmail();
+            if(!$email){
+                $email = $quote->getCustomerEmail();
             }
+            if(!$email){
+                $email = $shippingAddress->getEmail();
+            }
+            if(!$email){
+                $email = $session->getJirafeCustomerEmail();
+            }
+
+            $firstName = $billingAddress->getFirstname();
+            if(!$firstName){
+                $firstName = $quote->getCustomerFirstname();
+            }
+            if(!$firstName){
+                $firstName = $shippingAddress->getFirstname();
+            }
+
+            if($email){
+                $piwikTracker->setCustomVariable(3, 'email', $email);
+                $piwikTracker->setCustomVariable(4, 'firstName', $firstName);
+                Mage::getModel('foomanjirafe/cart')->saveRecoveryInformation(
+                    $email, $piwikTracker->getVisitorId(), $quote->getId()
+                );
+                $session->setJirafeCustomerEmail($email);
+            }
+
             $piwikTracker->doTrackEcommerceCartUpdate($quote->getBaseGrandTotal());
             $quote->setJirafeVisitorId($piwikTracker->getVisitorId());
         }
@@ -638,6 +658,7 @@ class Fooman_Jirafe_Model_Observer
     {
         $billingAddress = $quote->getBillingAddress();
         $shippingAddress = $quote->getShippingAddress();
+        $session = Mage::getSingleton('core/session');
 
         if($quote->dataHasChangedFor('customer_email') || $quote->dataHasChangedFor('customer_firstname')) {
             return true;
@@ -651,6 +672,9 @@ class Fooman_Jirafe_Model_Observer
             if( $shippingAddress->dataHasChangedFor('email') ||  $shippingAddress->dataHasChangedFor('firstname')) {
                 return true;
             }
+        }
+        if ($session->getJirafeCustomerEmail()) {
+            return true;
         }
         return false;
     }

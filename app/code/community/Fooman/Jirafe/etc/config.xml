@@ -18,7 +18,7 @@
 <config>
     <modules>
         <Fooman_Jirafe>
-            <version>1.1.2</version>
+            <version>1.1.3</version>
         </Fooman_Jirafe>
     </modules>
 
@@ -87,6 +87,7 @@
                 <entities>
                     <report><table>foomanjirafe_report</table></report>
                     <event><table>foomanjirafe_event</table></event>
+                    <cart><table>foomanjirafe_cart</table></cart>
                 </entities>
             </foomanjirafe_mysql4>
             <log>
@@ -566,9 +567,21 @@
     <crontab>
         <jobs>
             <foomanjirafe_report>
-                <schedule><cron_expr>5 * * * *</cron_expr></schedule>
-                <run><model>foomanjirafe/report::cron</model></run>
+                <schedule>
+                    <cron_expr>5 * * * *</cron_expr>
+                </schedule>
+                <run>
+                    <model>foomanjirafe/report::cron</model>
+                </run>
             </foomanjirafe_report>
+            <foomanjirafe_cart_clean>
+                <schedule>
+                    <cron_expr>5 0 * * *</cron_expr>
+                </schedule>
+                <run>
+                    <model>foomanjirafe/cart::periodicClean</model>
+                </run>
+            </foomanjirafe_cart_clean>
         </jobs>
     </crontab>
 </config>
