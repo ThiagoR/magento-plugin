@@ -65,8 +65,9 @@ class Fooman_Jirafe_Model_Cart extends Mage_Core_Model_Abstract
     {
         //delete after 90 days
         $deleteAfter = 60*60*24*90;
-        $collection = $this->getCollection()->addFieldToFiler();
-        $collection->addFieldToFilter('updated_at', array('to'=>date("Y-m-d", time()-$deleteAfter)));
+        $collection = $this->getCollection();
+        Mage::helper('foomanjirafe')->debug('Cleaning cart recovery info older than %s', date("Y-m-d", time()-$deleteAfter));
+        $collection->addFieldToFilter('created_at', array('to'=>date("Y-m-d", time()-$deleteAfter)));
         $collection->walk('delete');
     }
 
