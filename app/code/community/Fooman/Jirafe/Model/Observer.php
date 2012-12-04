@@ -656,9 +656,22 @@ class Fooman_Jirafe_Model_Observer
 
     protected function abandonedCartInfoNowAvailable($quote)
     {
+        $session = Mage::getSingleton('core/session');
+        if ($session->getJirafeCustomerEmail()) {
+            return true;
+        }
+
+        $customerSession = Mage::getSingleton('customer/session');
         $billingAddress = $quote->getBillingAddress();
         $shippingAddress = $quote->getShippingAddress();
-        $session = Mage::getSingleton('core/session');
+
+        if($customerSession){
+            $customer = Mage::getSingleton('customer/session')->getCustomer();
+            if($customer){
+                $session->setJirafeCustomerEmail($customer->getEmail());
+                return true;
+            }
+        }
 
         if($quote->dataHasChangedFor('customer_email') || $quote->dataHasChangedFor('customer_firstname')) {
             return true;
@@ -672,9 +685,6 @@ class Fooman_Jirafe_Model_Observer
             if( $shippingAddress->dataHasChangedFor('email') ||  $shippingAddress->dataHasChangedFor('firstname')) {
                 return true;
             }
-        }
-        if ($session->getJirafeCustomerEmail()) {
-            return true;
         }
         return false;
     }
