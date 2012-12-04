@@ -18,7 +18,7 @@ class Fooman_Jirafe_CartController extends Mage_Core_Controller_Front_Action
 
     public function indexAction()
     {
-        $visitorIdMd5 = $this->getRequest()->getParam('visitor_id');
+        $visitorIdMd5 = $this->getRequest()->getParam('visitorId');
         $customerSession = Mage::getSingleton('customer/session');
         if (!$customerSession->isLoggedIn()) {
             try{
