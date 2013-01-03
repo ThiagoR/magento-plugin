@@ -37,7 +37,7 @@
                 <a href="<?php echo $this->getReportUrl()?>"><?php echo $this->__('Run Report'); ?></a> |
                 <a onclick = "if(window.confirm(
                         '<?php echo $this->htmlEscape(Mage::helper('foomanjirafe')->__(
-                            'The reset is irreversible and you will loose all historical visitor data! It is only recommended if you are setting up a new environment from a database backup. If in doubt cancel and contact support@jirafe.com. Are you sure you want to continue with the Reset?'
+                            'This reset is irreversible and you will lose all historical visitor data! It is only recommended if you are setting up a new environment from a database backup. If in doubt, you should press cancel and contact support@jirafe.com for guidance. Are you sure you want to continue with the Reset?'
                         )) ?>'
                         )){ return location.href='<?php echo $this->getResetUrl()?>'}"href="#"><?php echo $this->__('Jirafe Reset'); ?></a></span>
         <?php endif;?>
