@@ -16,6 +16,8 @@
 class Fooman_Jirafe_Model_Mysql4_Event extends Mage_Core_Model_Mysql4_Abstract
 {
 
+    const EVENT_TABLE_LOCK = 'foomanjirafe_event_table_lock';
+
     protected function _construct ()
     {
         $this->_init('foomanjirafe/event', 'id');
@@ -53,7 +55,7 @@ class Fooman_Jirafe_Model_Mysql4_Event extends Mage_Core_Model_Mysql4_Abstract
         //need to lock the table so that version is consecutive per store id
         //and no events are dropped
         $tableName = $this->getMainTable();
-        $this->_getWriteAdapter()->raw_query("LOCK TABLES `{$tableName}` WRITE;");
+        $this->acquireAdvisoryLock(self::EVENT_TABLE_LOCK);
         $lastEventNumberForSite = $this->getLastVersionNumber($event->getSiteId());
         $event->setVersion($lastEventNumberForSite + 1);
         if (Mage::helper('foomanjirafe')->isDebug()) {
@@ -67,7 +69,7 @@ class Fooman_Jirafe_Model_Mysql4_Event extends Mage_Core_Model_Mysql4_Abstract
 
     protected function _afterSave(Mage_Core_Model_Abstract $event)
     {
-        $this->_getWriteAdapter()->raw_query("UNLOCK TABLES;");
+        $this->releaseAdvisoryLock(self::EVENT_TABLE_LOCK);
         return $this;
     }
 
