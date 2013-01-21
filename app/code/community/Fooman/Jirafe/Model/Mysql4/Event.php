@@ -55,14 +55,14 @@ class Fooman_Jirafe_Model_Mysql4_Event extends Mage_Core_Model_Mysql4_Abstract
         //need to lock the table so that version is consecutive per store id
         //and no events are dropped
         $tableName = $this->getMainTable();
-        $this->acquireAdvisoryLock(self::EVENT_TABLE_LOCK);
-        $lastEventNumberForSite = $this->getLastVersionNumber($event->getSiteId());
-        $event->setVersion($lastEventNumberForSite + 1);
-        if (Mage::helper('foomanjirafe')->isDebug()) {
-            $event = array('v' => $event->getVersion(), 'a' => $event->getAction(), 'd' => json_decode($event->getEventData(), true));
-            Mage::helper('foomanjirafe')->debugEvent(json_encode($event));
+        if($this->acquireAdvisoryLock(self::EVENT_TABLE_LOCK)){
+            $lastEventNumberForSite = $this->getLastVersionNumber($event->getSiteId());
+            $event->setVersion($lastEventNumberForSite + 1);
+            if (Mage::helper('foomanjirafe')->isDebug()) {
+                $event = array('v' => $event->getVersion(), 'a' => $event->getAction(), 'd' => json_decode($event->getEventData(), true));
+                Mage::helper('foomanjirafe')->debugEvent(json_encode($event));
+            }
         }
-
         return $this;
     }
 
