@@ -29,10 +29,15 @@ class Fooman_Jirafe_Model_Mysql4_Report extends Mage_Core_Model_Mysql4_Abstract
             $select = $this->_getReadAdapter()->select()
                             ->from($this->getTable('sales/order'), array())
                             ->columns('SUM(base_grand_total) AS sales_grand_total')
+                            ->columns('SUM(base_total_canceled) AS sales_grand_total_canceled')
                             ->columns('SUM(base_tax_amount) AS sales_taxes')
+                            ->columns('SUM(base_tax_canceled) AS sales_taxes_canceled')
                             ->columns('SUM(base_shipping_amount) AS sales_shipping')
+                            ->columns('SUM(base_shipping_canceled) AS sales_shipping_canceled')
                             ->columns('SUM(base_subtotal) AS sales_subtotal')
+                            ->columns('SUM(base_subtotal_canceled) AS sales_subtotal_canceled')
                             ->columns('SUM(base_discount_amount) AS sales_discounts')
+                            ->columns('SUM(base_discount_canceled) AS sales_discounts_canceled')
                             ->where('created_at >= ?', $from)
                             ->where('created_at < ?', $to)
                             ->where('store_id = ?', $storeId);
@@ -41,7 +46,7 @@ class Fooman_Jirafe_Model_Mysql4_Report extends Mage_Core_Model_Mysql4_Abstract
 
             foreach (array('sales_grand_total', 'sales_taxes', 'sales_shipping', 'sales_subtotal', 'sales_discounts') as $value) {
                 if (!empty($res[$value])) {
-                    $sales[$value] = $res[$value];
+                    $sales[$value] = $res[$value] - $res[$value.'_canceled'];
                 }
             }
         } catch (Exception $e) {
