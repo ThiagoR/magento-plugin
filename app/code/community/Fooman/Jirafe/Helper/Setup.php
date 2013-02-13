@@ -359,6 +359,7 @@ class Fooman_Jirafe_Helper_Setup extends Mage_Core_Helper_Abstract
             DELETE FROM `{$installer->getTable('core_resource')}` WHERE code = 'foomanjirafe_setup'
             ");
         $installer->endSetup();
+        Mage::app()->cleanCache(array(Mage_Core_Model_Config::CACHE_TAG, Mage_Core_Block_Abstract::CACHE_GROUP));
     }
 
 }
