@@ -16,6 +16,8 @@
 class Fooman_Jirafe_Model_Mysql4_Event extends Mage_Core_Model_Mysql4_Abstract
 {
 
+    const EVENT_TABLE_LOCK = 'foomanjirafe_event_table_lock';
+
     protected function _construct ()
     {
         $this->_init('foomanjirafe/event', 'id');
@@ -24,7 +26,7 @@ class Fooman_Jirafe_Model_Mysql4_Event extends Mage_Core_Model_Mysql4_Abstract
     public function acquireAdvisoryLock($siteId)
     {
         $lock = sprintf('jirafe_events_%d', $siteId);
-        return (bool)$this->_getWriteAdapter()->raw_fetchRow("SELECT GET_LOCK('{$lock}', 0) AS l", 'l');
+        return (bool)$this->_getWriteAdapter()->raw_fetchRow("SELECT GET_LOCK('{$lock}', 60) AS l", 'l');
     }
 
     public function releaseAdvisoryLock($siteId)
@@ -53,21 +55,23 @@ class Fooman_Jirafe_Model_Mysql4_Event extends Mage_Core_Model_Mysql4_Abstract
         //need to lock the table so that version is consecutive per store id
         //and no events are dropped
         $tableName = $this->getMainTable();
-        $this->_getWriteAdapter()->raw_query("LOCK TABLES `{$tableName}` WRITE;");
-        $lastEventNumberForSite = $this->getLastVersionNumber($event->getSiteId());
-        $event->setVersion($lastEventNumberForSite + 1);
-        if (Mage::helper('foomanjirafe')->isDebug()) {
-            $event = array('v' => $event->getVersion(), 'a' => $event->getAction(), 'd' => json_decode($event->getEventData(), true));
-            Mage::helper('foomanjirafe')->debugEvent(json_encode($event));
+        if($this->acquireAdvisoryLock(self::EVENT_TABLE_LOCK)){
+            $lastEventNumberForSite = $this->getLastVersionNumber($event->getSiteId());
+            $event->setVersion($lastEventNumberForSite + 1);
+            if (Mage::helper('foomanjirafe')->isDebug()) {
+                $event = array('v' => $event->getVersion(), 'a' => $event->getAction(), 'd' => json_decode($event->getEventData(), true));
+                Mage::helper('foomanjirafe')->debugEvent(json_encode($event));
+            }
+        } else {
+            Mage::throwException('Can\'t lock event table - skip event');
         }
-
         return $this;
     }
 
 
     protected function _afterSave(Mage_Core_Model_Abstract $event)
     {
-        $this->_getWriteAdapter()->raw_query("UNLOCK TABLES;");
+        $this->releaseAdvisoryLock(self::EVENT_TABLE_LOCK);
         return $this;
     }
 
