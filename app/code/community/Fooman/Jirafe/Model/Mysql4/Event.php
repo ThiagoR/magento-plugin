@@ -26,7 +26,7 @@ class Fooman_Jirafe_Model_Mysql4_Event extends Mage_Core_Model_Mysql4_Abstract
     public function acquireAdvisoryLock($siteId)
     {
         $lock = sprintf('jirafe_events_%d', $siteId);
-        return (bool)$this->_getWriteAdapter()->raw_fetchRow("SELECT GET_LOCK('{$lock}', 0) AS l", 'l');
+        return (bool)$this->_getWriteAdapter()->raw_fetchRow("SELECT GET_LOCK('{$lock}', 60) AS l", 'l');
     }
 
     public function releaseAdvisoryLock($siteId)
@@ -62,6 +62,8 @@ class Fooman_Jirafe_Model_Mysql4_Event extends Mage_Core_Model_Mysql4_Abstract
                 $event = array('v' => $event->getVersion(), 'a' => $event->getAction(), 'd' => json_decode($event->getEventData(), true));
                 Mage::helper('foomanjirafe')->debugEvent(json_encode($event));
             }
+        } else {
+            Mage::throwException('Can\'t lock event table - skip event');
         }
         return $this;
     }
